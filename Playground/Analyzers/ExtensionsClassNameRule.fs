@@ -3,6 +3,7 @@
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
+open Microsoft.CodeAnalysis.CSharp.Syntax
 open Microsoft.CodeAnalysis.Diagnostics
 open System.Collections.Immutable
 
@@ -11,8 +12,8 @@ type public ExtensionsClassNameRule() =
     inherit DiagnosticAnalyzer()
 
     let descriptor = DiagnosticDescriptor("Z00001",
-                                          "Extensions class names should contain the extended type name concatenated with Extensions suffix",
-                                          "{0} should be renamed to {1}." ,
+                                          "Extensions methods should be defined in classes with name composed from extended type name concatenated with \"Extensions\" suffix.",
+                                          "{0} method should be declared in a class named {1}." ,
                                           "Naming",
                                           DiagnosticSeverity.Warning,
                                           true,
@@ -22,12 +23,24 @@ type public ExtensionsClassNameRule() =
     override rule.SupportedDiagnostics with get() = ImmutableArray.Create(descriptor)
 
     override rule.Initialize (context: AnalysisContext) =
-        let getClassName (classDeclaration: ClassDeclarationSyntax) = classDeclaration.Identifier.ValueText
+        // let getClassName (classDeclaration: ClassDeclarationSyntax) = classDeclaration.Identifier.ValueText
 
-        let analyze (ctx: SyntaxNodeAnalysisContext) =
-            match ctx.Node with
-                |  z ->
-                    let d = Diagnostic.Create(descriptor, z.GetLocation(), z)
-                    ctx.ReportDiagnostic(d)
+        let getMethodName (methodDeclaration: MethodDeclarationSyntax) = methodDeclaration.Identifier.ValueText
 
-        context.RegisterSyntaxNodeAction(analyze, SyntaxKind.ClassDeclaration)
+        let isExtension (methodDeclaration: MethodDeclarationSyntax) =
+            methodDeclaration.Modifiers.IndexOf(SyntaxKind.StaticKeyword) <> 0 &&
+            methodDeclaration.ParameterList.Parameters.Count > 0 &&
+            methodDeclaration.ParameterList.Parameters.First().Modifiers.IndexOf(SyntaxKind.ThisExpression) <> 0
+
+        let analyze (context: SyntaxNodeAnalysisContext) =
+            match context.Node with
+                |  :? MethodDeclarationSyntax as methodDeclaration when isExtension methodDeclaration ->
+                    let methodName = getMethodName methodDeclaration
+
+                    printfn "%s" methodName
+
+                    let diagnostic = Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, "zzz")
+                    context.ReportDiagnostic(diagnostic)
+                | _ -> ()
+
+        context.RegisterSyntaxNodeAction(analyze, SyntaxKind.MethodDeclaration)

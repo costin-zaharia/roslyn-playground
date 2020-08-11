@@ -2,6 +2,6 @@
 {
     public static class WrongName
     {
-        public static string Extension(this string str) => str;
+        public static string ExtensionMethod(this string str) => str;
     }
 }

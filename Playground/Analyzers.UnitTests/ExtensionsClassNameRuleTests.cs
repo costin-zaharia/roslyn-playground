@@ -18,7 +18,7 @@ namespace Analyzers.UnitTests
             const string code = @"
 public static class WrongName
 {
-    public static string Extension(this string str) => str;
+    public static string ExtensionForString(this string str) => str;
 }
 ";
             var compilation = Compile(code);
