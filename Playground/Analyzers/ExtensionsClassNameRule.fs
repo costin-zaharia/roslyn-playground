@@ -31,12 +31,12 @@ type public ExtensionsClassNameRule() =
             match node with
                 | :? MethodDeclarationSyntax as methodDeclaration -> methodDeclaration.Identifier.ValueText
                 | :? ClassDeclarationSyntax as classDeclaration -> classDeclaration.Identifier.ValueText
+                | :? TypeSyntax as typeSyntax -> typeSyntax.GetText().ToString()
                 | _ -> ""
 
         let isParent(node: SyntaxNode) =
             match node with
-                | :? ClassDeclarationSyntax -> true
-                | :? StructDeclarationSyntax -> true
+                | :? ClassDeclarationSyntax | :? StructDeclarationSyntax-> true
                 | _ -> false
 
         let getParent (methodDeclaration: MethodDeclarationSyntax) =
@@ -51,10 +51,11 @@ type public ExtensionsClassNameRule() =
                     let parentName = methodDeclaration
                                         |> getParent
                                         |> getName
+                    let expectedTypeName = methodDeclaration.ParameterList.Parameters.First()
+                                            |> context.SemanticModel.GetDeclaredSymbol
+                                            |> fun s -> s.Type.Name + "Extensions"
 
-                    printfn "%s" (parentName.ToString())
-
-                    let diagnostic = Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, "zzz", parentName)
+                    let diagnostic = Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, expectedTypeName, parentName)
                     context.ReportDiagnostic(diagnostic)
                 | _ -> ()
 
