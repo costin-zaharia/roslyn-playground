@@ -2,6 +2,7 @@
 
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
+open Microsoft.CodeAnalysis.CSharp.Syntax
 open Microsoft.CodeAnalysis.Diagnostics
 open System.Collections.Immutable
 
@@ -21,6 +22,8 @@ type public ExtensionsClassNameRule() =
     override rule.SupportedDiagnostics with get() = ImmutableArray.Create(descriptor)
 
     override rule.Initialize (context: AnalysisContext) =
+        let getClassName (classDeclaration: ClassDeclarationSyntax) = classDeclaration.Identifier.ValueText
+
         let analyze (ctx: SyntaxNodeAnalysisContext) =
             match ctx.Node with
                 |  z ->

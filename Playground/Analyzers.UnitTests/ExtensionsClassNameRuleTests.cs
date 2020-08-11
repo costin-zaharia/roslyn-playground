@@ -27,7 +27,7 @@ public static class WrongName
 
             Print(analysisResult);
 
-            Assert.That(analysisResult.GetAllDiagnostics().Length, Is.Zero);
+            Assert.That(analysisResult.GetAllDiagnostics().Length, Is.EqualTo(1));
         }
 
         private static void Print(AnalysisResult analysisResult)
