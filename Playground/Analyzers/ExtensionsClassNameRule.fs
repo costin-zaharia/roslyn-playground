@@ -29,20 +29,18 @@ type public ExtensionsClassNameRule() =
             let getExpectedName (methodDeclaration: MethodDeclarationSyntax) =
                 methodDeclaration.ParameterList.Parameters.First()
                 |> context.SemanticModel.GetDeclaredSymbol
-                |> fun s -> s.Type.Name + "Extensions"
+                |> fun symbol -> symbol.Type.Name + "Extensions"
 
             match context.Node with
             |  :? MethodDeclarationSyntax as methodDeclaration when isExtension methodDeclaration ->
                 let methodName = getName methodDeclaration
-                let parentName = methodDeclaration |> getParent |> getName
+                let parentName = getParentName methodDeclaration
                 let expectedTypeName = getExpectedName methodDeclaration
-                let diagnostic =
-                    if parentName = expectedTypeName then None
-                    else Some(Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, expectedTypeName, parentName))
 
-                match diagnostic with
-                | Some diag -> context.ReportDiagnostic(diag)
-                | None -> ()
+                match parentName with
+                | wrong when wrong <> expectedTypeName ->
+                    context.ReportDiagnostic(Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, expectedTypeName, wrong))
+                | _ -> ()
             | _ -> ()
 
         context.RegisterSyntaxNodeAction(analyze, SyntaxKind.MethodDeclaration)

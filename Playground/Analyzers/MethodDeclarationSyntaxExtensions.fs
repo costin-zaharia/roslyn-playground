@@ -15,3 +15,5 @@ let getParent (methodDeclaration: MethodDeclarationSyntax) =
     methodDeclaration.Ancestors()
     |> Seq.filter isParent
     |> Seq.head
+
+let getParentName (methodDeclaration: MethodDeclarationSyntax) = methodDeclaration |> getParent |> getName
