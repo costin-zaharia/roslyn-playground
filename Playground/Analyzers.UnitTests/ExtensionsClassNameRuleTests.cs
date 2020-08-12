@@ -25,6 +25,11 @@ public static class WrongName
 
     public static void Test(){}
 }
+
+public static class StringExtensions
+{
+    public static string Same(this string str) => str;
+}
 ";
             var compilation = Compile(code);
 

@@ -26,16 +26,23 @@ type public ExtensionsClassNameRule() =
 
     override rule.Initialize (context: AnalysisContext) =
         let analyze (context: SyntaxNodeAnalysisContext) =
-            match context.Node with
-                |  :? MethodDeclarationSyntax as methodDeclaration when (isExtension methodDeclaration) ->
-                    let methodName = getName methodDeclaration
-                    let parentName = methodDeclaration |> getParent |> getName
-                    let expectedTypeName = methodDeclaration.ParameterList.Parameters.First()
-                                            |> context.SemanticModel.GetDeclaredSymbol
-                                            |> fun s -> s.Type.Name + "Extensions"
+            let getExpectedName (methodDeclaration: MethodDeclarationSyntax) =
+                methodDeclaration.ParameterList.Parameters.First()
+                |> context.SemanticModel.GetDeclaredSymbol
+                |> fun s -> s.Type.Name + "Extensions"
 
-                    let diagnostic = Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, expectedTypeName, parentName)
-                    context.ReportDiagnostic(diagnostic)
-                | _ -> ()
+            match context.Node with
+            |  :? MethodDeclarationSyntax as methodDeclaration when isExtension methodDeclaration ->
+                let methodName = getName methodDeclaration
+                let parentName = methodDeclaration |> getParent |> getName
+                let expectedTypeName = getExpectedName methodDeclaration
+                let diagnostic =
+                    if parentName = expectedTypeName then None
+                    else Some(Diagnostic.Create(descriptor, methodDeclaration.GetLocation(), methodName, expectedTypeName, parentName))
+
+                match diagnostic with
+                | Some diag -> context.ReportDiagnostic(diag)
+                | None -> ()
+            | _ -> ()
 
         context.RegisterSyntaxNodeAction(analyze, SyntaxKind.MethodDeclaration)

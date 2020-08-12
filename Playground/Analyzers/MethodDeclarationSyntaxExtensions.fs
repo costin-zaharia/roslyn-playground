@@ -13,5 +13,5 @@ let isExtension (methodDeclaration: MethodDeclarationSyntax) =
 
 let getParent (methodDeclaration: MethodDeclarationSyntax) =
     methodDeclaration.Ancestors()
-        |> Seq.filter isParent
-        |> Seq.head
+    |> Seq.filter isParent
+    |> Seq.head
