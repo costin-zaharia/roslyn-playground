@@ -20,6 +20,10 @@ namespace Analyzers.UnitTests
 public static class WrongName
 {
     public static string ExtensionForString(this string str) => str;
+
+    public static string OtherMethod(string str) => str;
+
+    public static void Test(){}
 }
 ";
             var compilation = Compile(code);

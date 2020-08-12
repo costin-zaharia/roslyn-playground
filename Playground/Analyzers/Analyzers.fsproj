@@ -5,6 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="SyntaxNodeExtensions.fs" />
+        <Compile Include="MethodDeclarationSyntaxExtensions.fs" />
         <Compile Include="ExtensionsClassNameRule.fs" />
     </ItemGroup>
 

@@ -1,10 +1,13 @@
 ﻿namespace Analyzers
 
+open Analyzers
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 open Microsoft.CodeAnalysis.Diagnostics
 open System.Collections.Immutable
+open SyntaxNodeExtensions
+open MethodDeclarationSyntaxExtensions
 
 [<DiagnosticAnalyzer(Microsoft.CodeAnalysis.LanguageNames.CSharp)>]
 type public ExtensionsClassNameRule() =
@@ -22,35 +25,11 @@ type public ExtensionsClassNameRule() =
     override rule.SupportedDiagnostics with get() = ImmutableArray.Create(descriptor)
 
     override rule.Initialize (context: AnalysisContext) =
-        let isExtension (methodDeclaration: MethodDeclarationSyntax) =
-            methodDeclaration.Modifiers.IndexOf(SyntaxKind.StaticKeyword) <> 0 &&
-            methodDeclaration.ParameterList.Parameters.Count > 0 &&
-            methodDeclaration.ParameterList.Parameters.First().Modifiers.IndexOf(SyntaxKind.ThisExpression) <> 0
-
-        let getName(node: SyntaxNode) =
-            match node with
-                | :? MethodDeclarationSyntax as methodDeclaration -> methodDeclaration.Identifier.ValueText
-                | :? ClassDeclarationSyntax as classDeclaration -> classDeclaration.Identifier.ValueText
-                | :? TypeSyntax as typeSyntax -> typeSyntax.GetText().ToString()
-                | _ -> ""
-
-        let isParent(node: SyntaxNode) =
-            match node with
-                | :? ClassDeclarationSyntax | :? StructDeclarationSyntax-> true
-                | _ -> false
-
-        let getParent (methodDeclaration: MethodDeclarationSyntax) =
-            methodDeclaration.Ancestors()
-                |> Seq.filter isParent
-                |> Seq.head
-
         let analyze (context: SyntaxNodeAnalysisContext) =
             match context.Node with
-                |  :? MethodDeclarationSyntax as methodDeclaration when isExtension methodDeclaration ->
+                |  :? MethodDeclarationSyntax as methodDeclaration when (isExtension methodDeclaration) ->
                     let methodName = getName methodDeclaration
-                    let parentName = methodDeclaration
-                                        |> getParent
-                                        |> getName
+                    let parentName = methodDeclaration |> getParent |> getName
                     let expectedTypeName = methodDeclaration.ParameterList.Parameters.First()
                                             |> context.SemanticModel.GetDeclaredSymbol
                                             |> fun s -> s.Type.Name + "Extensions"
