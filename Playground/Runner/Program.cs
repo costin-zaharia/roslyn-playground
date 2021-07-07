@@ -21,6 +21,16 @@ namespace Runner
             var analyzer = new AnalyzerFileReference(typeof(ExtensionsClassNameRule).Assembly.Location, AssemblyLoader.Instance);
             var solution = workspace.CurrentSolution.AddAnalyzerReference(analyzer);
 
+            var dependencyGraph = solution.GetProjectDependencyGraph();
+
+            foreach (var projectId in dependencyGraph.GetTopologicallySortedProjects())
+            {
+                var project = solution.GetProject(projectId);
+
+                var compilation = await project.GetCompilationAsync().ConfigureAwait(false);
+                var diagnostics = compilation.GetDiagnostics();
+            }
+
             Console.WriteLine($"Solution loaded: {solution.FilePath}, Projects: {workspace.CurrentSolution.Projects.Count()}");
         }
 
