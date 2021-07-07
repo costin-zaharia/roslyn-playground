@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analyzers.IntegrationTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analyzers.UnitTests", "Analyzers.UnitTests\Analyzers.UnitTests.csproj", "{D9947EC9-EB13-4402-816D-9E98750D94E8}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Analyzers", "Analyzers\Analyzers.fsproj", "{A6F0F746-DFE5-4A27-806D-D65482B8A071}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Analyzers.Fs", "Analyzers.Fs\Analyzers.Fs.fsproj", "{A6F0F746-DFE5-4A27-806D-D65482B8A071}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
